@@ -60,10 +60,27 @@ def factorize1(n):
     assert False, 'You gave me a prime number to factor'
     return -1
 
+def factorize3(n):
+    for i in range(2, math.sqrt(n) + 1):
+        if n % i == 0:
+            return i
+        x = x + 1
+    assert False, 'You gave me a prime number to factor'
+    return -1
+
+# too many primes to create a sieve: how does the running time compare to the brute force
+# generate lots of plots etc. 
+# complexity analysis = is this too many? 
+    # each digit you add, the space for search multiplies by 5
+
 
 #def factorize2(n): this function creates a list and edits it after each prime
 # factor has been considered and ruled out. 
 # turns out to not be a time efficient way to do factorization. 
+# create a counter i from 2 to sqrt(n)
+    # counter i 2, starts at 0, goes to 1, everytime it goes to 0, skip the number
+    # counter i3, starts at 0, goes to 2, everytime it gets to 0, skip the number
+    # counter i4
 import math
 def factorize2(n):
     p = int(math.sqrt(n))
@@ -107,8 +124,264 @@ def fermfact1(n):
 #def factorize3(n):
 # ...
 import math
-import math
+from math import sqrt
 def fermfact2(n):
+    p = n % 10
+    a = int(math.ceil(math.sqrt(n)))
+    bmodeven = [0, 4, 6]
+    bmododd = [1, 5, 9]
+    bsq = a ** 2 - n
+    zero = 0.0
+    if n % 4 == 1:
+        if a % 2 == 0:
+            a = a + 1
+            bsq = a ** 2 - n
+        if sqrt(bsq)%1 == zero:
+            return a - sqrt(bsq)
+        while bsq % 10 not in bmodeven:
+            a = a + 2
+            bsq = a ** 2 - n
+            if sqrt(bsq)%1 == 0:
+                return a - sqrt(bsq)
+        while sqrt(bsq) % 1 is not zero:
+            if n % 10 == 1:
+                if a % 10 == 1:
+                    a = a + 4
+                    bsq = a ** 2 - n
+                    if sqrt(bsq)%1 == zero:
+                        return a - sqrt(bsq)
+                    a = a + 4
+                    bsq = a ** 2 - n
+                    if sqrt(bsq)%1 == zero:
+                        return a - sqrt(bsq)
+                    a = a + 2
+                    bsq = a ** 2 - n
+                if a % 10 == 5:
+                    a = a + 4
+                    bsq = a ** 2 - n
+                    if sqrt(bsq)%1 == zero:
+                        return a - sqrt(bsq)
+                    a = a + 2
+                    bsq = a ** 2 - n
+                    if sqrt(bsq)%1 == zero:
+                        return a - sqrt(bsq)
+                    a = a + 4
+                    bsq = a ** 2 - n
+                if a % 10 == 9:
+                    a = a + 2
+                    bsq = a ** 2 - n
+                    if sqrt(bsq)%1 == zero:
+                        return a - sqrt(bsq)
+                    a = a + 4
+                    bsq = a ** 2 - n
+                    if sqrt(bsq)%1 == zero:
+                        return a - sqrt(bsq)
+                    a = a + 4
+                    bsq = a ** 2 - n
+            if n % 10 == 3:
+                if a % 10 == 3:
+                    a = a + 4
+                    bsq = a ** 2 - n
+                    if sqrt(bsq)%1 == zero:
+                        return a - sqrt(bsq)
+                    a + a + 6
+                    bsq = a ** 2 - n
+                if a % 10 == 7:
+                    a = a + 6
+                    bsq = a ** 2 - n
+                    if sqrt(bsq)%1 == zero:
+                        return a - sqrt(bsq)
+                    a = a + 4
+                    bsq = a ** 2 - n
+            if n % 10 == 5:
+                a = a + 2
+                bsq = a ** 2 - n
+            if n % 10 == 7:
+                if a % 10 == 1:
+                    a = a + 8
+                    bsq = a ** 2 - n
+                    if sqrt(bsq)%1 == zero:
+                        return a - sqrt(bsq)
+                    a = a + 2
+                    bsq = a ** 2 - n
+                if a % 10 == 9:
+                    a = a + 2
+                    bsq = a ** 2 - n
+                    if sqrt(bsq)%1 == zero:
+                        return a - sqrt(bsq)
+                    a = a + 8
+                    bsq = a ** 2 - n
+            if n % 10 == 9:
+                if a % 10 == 3:
+                    a = a + 2
+                    bsq = a ** 2 - n
+                    if sqrt(bsq)%1 == zero:
+                        return a - sqrt(bsq)
+                    a = a + 2
+                    bsq = a ** 2 - n
+                    if sqrt(bsq)%1 == zero:
+                        return a - sqrt(bsq)
+                    a = a + 6
+                    bsq = a ** 2 - n
+                if a % 10 == 5:
+                    a = a + 2
+                    bsq = a ** 2 - n
+                    if sqrt(bsq)%1 == zero:
+                        return a - sqrt(bsq)
+                    a = a + 6
+                    bsq = a ** 2 - n
+                    if sqrt(bsq)%1 == zero:
+                        return a - sqrt(bsq)
+                    a = a + 2
+                    bsq = a ** 2 - n
+                if a % 10 == 7:
+                    a = a + 6
+                    bsq = a ** 2 - n
+                    if sqrt(bsq)%1 == zero:
+                        return a - sqrt(bsq)
+                    a = a + 2
+                    bsq = a ** 2 - n
+                    if sqrt(bsq)%1 == zero:
+                        return a - sqrt(bsq)
+                    a = a + 2
+                    bsq = a ** 2 - n
+        return a - sqrt(bsq)
+    if n % 4 == 3:
+        if a % 2 != 0:
+            a = a + 1       
+            bsq = a ** 2 - n
+        if sqrt(bsq)%1 == zero:
+            return a - sqrt(bsq)
+        while bsq % 10 not in bmododd:
+            a = a + 2
+            bsq = a ** 2 - n
+            if sqrt(bsq)%1 == zero:
+                return a - sqrt(bsq)
+        while sqrt(bsq)%1 is not zero:
+            if n % 10 == 1:
+                if a % 10 == 6:
+                    a = a + 4
+                    bsq = a ** 2 - n
+                    if sqrt(bsq)%1 == zero:
+                        return a - sqrt(bsq)
+                    a = a + 4
+                    bsq = a ** 2 - n
+                    if sqrt(bsq)%1 == zero:
+                        return a - sqrt(bsq)
+                    a = a + 2
+                    bsq = a ** 2 - n
+                if a % 10 == 0:
+                    a = a + 4
+                    bsq = a ** 2 - n
+                    if sqrt(bsq)%1 == zero:
+                        return a - sqrt(bsq)
+                    a = a + 2
+                    bsq = a ** 2 - n
+                    if sqrt(bsq)%1 == zero:
+                        return a - sqrt(bsq)
+                    a = a + 4
+                    bsq = a ** 2 - n
+                if a % 10 == 4:
+                    a = a + 2
+                    bsq = a ** 2 - n
+                    if sqrt(bsq)%1 == zero:
+                        return a - sqrt(bsq)
+                    a = a + 4
+                    bsq = a ** 2 - n
+                    if sqrt(bsq)%1 == zero:
+                        return a - sqrt(bsq)
+                    a = a + 4
+                    bsq = a ** 2 - n
+            if n % 10 == 3:
+                if a % 10 == 2:
+                    a = a + 6
+                    bsq = a ** 2 - n
+                    if sqrt(bsq)%1 == zero:
+                        return a - sqrt(bsq)
+                    a + a + 4
+                    bsq = a ** 2 - n
+                if a % 10 == 8:
+                    a = a + 4
+                    bsq = a ** 2 - n
+                    if sqrt(bsq)%1 == zero:
+                        return a - sqrt(bsq)
+                    a = a + 6
+                    bsq = a ** 2 - n
+            if n % 10 == 5:
+                a = a + 2
+                bsq = a ** 2 - n
+            if n % 10 == 7:
+                if a % 10 == 4:
+                    a = a + 2
+                    bsq = a ** 2 - n
+                    if sqrt(bsq)%1 == zero:
+                        return a - sqrt(bsq)
+                    a = a + 8
+                    bsq = a ** 2 - n
+                if a % 10 == 6:
+                    a = a + 8
+                    bsq = a ** 2 - n
+                    if sqrt(bsq)%1 == zero:
+                        return a - sqrt(bsq)
+                    a = a + 2
+                    bsq = a ** 2 - n
+            if n % 10 == 9:
+                if a % 10 == 8:
+                    a = a + 2
+                    bsq = a ** 2 - n
+                    if sqrt(bsq)%1 == zero:
+                        return a - sqrt(bsq)
+                    a = a + 2
+                    bsq = a ** 2 - n
+                    if sqrt(bsq)%1 == zero:
+                        return a - sqrt(bsq)
+                    a = a + 6
+                    bsq = a ** 2 - n
+                if a % 10 == 0:
+                    a = a + 2
+                    bsq = a ** 2 - n
+                    if sqrt(bsq)%1 == zero:
+                        return a - sqrt(bsq)
+                    a = a + 6
+                    bsq = a ** 2 - n
+                    if sqrt(bsq)%1 == zero:
+                        return a - sqrt(bsq)
+                    a = a + 2
+                    bsq = a ** 2 - n
+                if a % 10 == 2:
+                    a = a + 6
+                    bsq = a ** 2 - n
+                    if sqrt(bsq)%1 == zero:
+                        return a - sqrt(bsq)
+                    a = a + 2
+                    bsq = a ** 2 - n
+                    if sqrt(bsq)%1 == zero:
+                        return a - sqrt(bsq)
+                    a = a + 2
+                    bsq = a ** 2 - n
+        return a - sqrt(bsq) 
+
+#def factorize4(n):
+# ...
+import random
+import fractions
+def pollard_rho(n):
+    x = (random.randint(1, n) % (n - 2)) + 2
+    y = 0
+    c = (random.randint(1, n) % (n - 1)) + 1
+    d = 1
+    while x != y:
+        y = x
+        x = (x ** 2 + c) % n
+        y = (x ** 2 + c) % n
+        d = fractions.gcd(abs(x - y), n)
+        if d > 1:
+            return d
+        if d == n:
+            pollard_rho(n)
+    
+# ...
+def fermfact4(n):
     p = n % 10
     a = int(math.ceil(math.sqrt(n)))
     bmodeven = [0, 4, 6]
@@ -342,29 +615,138 @@ def fermfact2(n):
                     a = a + 2
                     bsq = a ** 2 - n
         return  a - math.sqrt(bsq)  
-
-#def factorize4(n):
-# ...
-import random
-import fractions
-def pollard_rho(n):
-    x = (random.randint(1, n) % (n - 2)) + 2
-    y = 0
-    c = (random.randint(1, n) % (n - 1)) + 1
-    d = 1
-    while x != y:
-        y = x
-        x = (x ** 2 + c) % n
-        y = (x ** 2 + c) % n
-        d = fractions.gcd(abs(x - y), n)
-        if d > 1:
-            return d
-        if d == n:
-            pollard_rho(n)
-    
-# ...
-
-
+def fermfact5(n):
+    p = n % 10
+    a = int(math.ceil(math.sqrt(n)))
+    bmodeven = [0, 4]
+    bmododd = [1, 9]
+    bsq = a ** 2 - n
+    if n % 4 == 1:
+        if a % 2 == 0:
+            a = a + 1
+            bsq = a ** 2 - n
+        if math.sqrt(bsq) == int(math.sqrt(bsq)):
+                    return a - math.sqrt(bsq)
+        while bsq % 16 not in bmodeven:
+            a = a + 2
+            bsq = a ** 2 - n
+            if math.sqrt(bsq) == int(math.sqrt(bsq)):
+                return a - math.sqrt(bsq)
+        while math.sqrt(bsq) != int(math.sqrt(bsq)):
+            if n % 16 == 1 or n % 16 == 13:
+                if a % 16 == 1 or a % 16 == 9:
+                    a = a + 6
+                    bsq = a ** 2 - n
+                    if math.sqrt(bsq) == int(math.sqrt(bsq)):
+                        return a - math.sqrt(bsq)
+                    a = a + 2
+                    bsq = a ** 2 - n
+                    if math.sqrt(bsq) == int(math.sqrt(bsq)):
+                        return a - math.sqrt(bsq)
+                    a = a + 6
+                    bsq = a ** 2 - n
+                    if math.sqrt(bsq) == int(math.sqrt(bsq)):
+                        return a - math.sqrt(bsq)
+                    a = a + 2
+                    bsq = a ** 2 - n
+                if a % 16 == 7 or a % 16 == 15:
+                    a = a + 2
+                    bsq = a ** 2 - n
+                    if math.sqrt(bsq) == int(math.sqrt(bsq)):
+                        return a - math.sqrt(bsq)
+                    a = a + 6
+                    bsq = a ** 2 - n
+                    if math.sqrt(bsq) == int(math.sqrt(bsq)):
+                        return a - math.sqrt(bsq)
+                    a = a + 2
+                    bsq = a ** 2 - n
+                    if math.sqrt(bsq) == int(math.sqrt(bsq)):
+                        return a - math.sqrt(bsq)
+                    a = a + 6
+                    bsq = a ** 2 - n
+            if n % 16 == 9 or n % 16 == 5:
+                if a % 16 == 3 or a % 16 == 11:
+                    a = a + 2
+                    bsq = a ** 2 - n
+                    if math.sqrt(bsq) == int(math.sqrt(bsq)):
+                        return a - math.sqrt(bsq)
+                    a = a + 6
+                    bsq = a ** 2 - n
+                    if math.sqrt(bsq) == int(math.sqrt(bsq)):
+                        return a - math.sqrt(bsq)
+                    a = a + 2
+                    bsq = a ** 2 - n
+                    if math.sqrt(bsq) == int(math.sqrt(bsq)):
+                        return a - math.sqrt(bsq)
+                    a = a + 6
+                    bsq = a ** 2 - n
+                if a % 16 == 5 or a % 16 == 13:
+                    a = a + 6
+                    bsq = a ** 2 - n
+                    if math.sqrt(bsq) == int(math.sqrt(bsq)):
+                        return a - math.sqrt(bsq)
+                    a = a + 2
+                    bsq = a ** 2 - n
+                    if math.sqrt(bsq) == int(math.sqrt(bsq)):
+                        return a - math.sqrt(bsq)
+                    a = a + 6
+                    bsq = a ** 2 - n
+                    if math.sqrt(bsq) == int(math.sqrt(bsq)):
+                        return a - math.sqrt(bsq)
+                    a = a + 2
+                    bsq = a ** 2 - n
+        return a - math.sqrt(bsq)
+    if n % 4 == 3:
+        if a % 2 != 0:
+            a = a + 1       
+            bsq = a ** 2 - n
+        if math.sqrt(bsq) == int(math.sqrt(bsq)):
+                        return a - math.sqrt(bsq)
+        while bsq % 16 not in bmododd:
+            a = a + 2
+            bsq = a ** 2 - n
+            if math.sqrt(bsq) == int(math.sqrt(bsq)):
+                return a - math.sqrt(bsq)
+        while math.sqrt(bsq) != int(math.sqrt(bsq)):
+            if n % 16 == 3 or n % 16 == 11:
+                if a % 16 == 1 or a % 16 == 9:
+                    a = a + 4
+                    bsq = a ** 2 - n
+            if n % 16 == 7 or n % 16 == 15:
+                if a % 16 ==  4:
+                    a = a + 4
+                    bsq = a ** 2 - n
+                    if math.sqrt(bsq) == int(math.sqrt(bsq)):
+                        return a - math.sqrt(bsq)
+                    a = a + 4
+                    bsq = a ** 2 - n
+                    if math.sqrt(bsq) == int(math.sqrt(bsq)):
+                        return a - math.sqrt(bsq)
+                    a = a + 8
+                    bsq = a ** 2 - n
+                if a % 16 == 8:
+                    a = a + 4
+                    bsq = a ** 2 - n
+                    if math.sqrt(bsq) == int(math.sqrt(bsq)):
+                        return a - math.sqrt(bsq)
+                    a = a + 8
+                    bsq = a ** 2 - n
+                    if math.sqrt(bsq) == int(math.sqrt(bsq)):
+                        return a - math.sqrt(bsq)
+                    a = a + 4
+                    bsq = a ** 2 - n
+                if a % 16 == 12:
+                    a = a + 8
+                    bsq = a ** 2 - n
+                    if math.sqrt(bsq) == int(math.sqrt(bsq)):
+                        return a - math.sqrt(bsq)
+                    a = a + 4
+                    bsq = a ** 2 - n
+                    if math.sqrt(bsq) == int(math.sqrt(bsq)):
+                        return a - math.sqrt(bsq)
+                    a = a + 4
+                    bsq = a ** 2 - n   
+        return  a - math.sqrt(bsq)  
 
 
 # Below we have test code:
@@ -376,7 +758,7 @@ if __name__ == '__main__':
     # First parse command line arguments and figure out which
     # function we want to test
     if len(sys.argv) <= 1:
-        fun = fermfact2
+        fun = fermfact5
     else:
         fun_to_call_string = sys.argv[1]
         assert fun_to_call_string in globals(), ('You did not implement '+fun_to_call_string)
