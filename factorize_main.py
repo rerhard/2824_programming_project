@@ -30,12 +30,98 @@ import sys
 import math
 # sys has useful utilities I need.
 
+
+
+
 from time import clock as time_clock
 # Time is being imported to measure
 # running time for the factorize
 # function.
 
+from functools import reduce # for pipe
+from random import randrange # to generate complexity analysis nums
+from time import perf_counter,sleep # timing, and sleep for test fns
+from multiprocessing import Pool # to run fns in different processes
+from os import getpid # to check that the fns are running in different processes
+from types import SimpleNamespace # dict property access is annoying
+
 # -------------------------------------------
+
+# fn composition ltr
+pipe = lambda fn1,*fns: lambda arg,*args: reduce(lambda a,f: f(a), fns, fn1(arg,*args))
+
+
+
+#
+# test setup
+# 
+def gen_nums(digits=1,samples=None,fixed_num=None):
+  if(fixed_num):
+    if(samples==None): return [fixed_num]
+    return [fixed_num for r in range(samples)]
+
+  min_num = 10**(digits-1)
+  max_num = 10**digits
+  sample_len = range(samples or int(10**(digits/2)))
+  return [randrange(min_num,max_num) for s in sample_len]
+
+def summarizeFnResults(summary_list):
+  summaries = {}
+  for result in summary_list:
+    if(not (result.name in summaries)):
+      summaries[result.name] = SimpleNamespace(
+        min=999999999999,
+        max=0,
+        mean=0,
+        durations=[],
+        results=[],
+        name='',
+      )
+    summary = summaries[result.name]
+
+    if(result.duration<summary.min):summary.min=result.duration
+    if(result.duration>summary.max):summary.max=result.duration
+    summary.durations.append(result.duration)
+    summary.results.append(result)
+    summary.name=result.name
+    del result.name
+
+  for name in summaries:
+    summaries[name].mean = sum(summaries[name].durations)/len(summaries[name].durations)
+    del summaries[name].durations
+  [print('{} \nmean: {} \nmax: {}'.format(s.name,s.mean,s.max)) for s in summaries.values()]
+  return;
+  # return summaries
+
+def execTest(tup):
+  name,fn,num = tup;
+  start = perf_counter()
+  output = fn(num)
+  end = perf_counter()
+  print('pid',getpid(),'time',end-start,'{}({})={}'.format(name,num,output))
+  return SimpleNamespace(
+    duration=end-start,
+    name=name,
+    output=output,
+  )
+
+pool = Pool()
+execTests = lambda nums:pipe(
+  lambda *fns:[(fn.__name__,fn,num)  for num in nums for fn in fns],
+  lambda tups:pool.map(execTest,tups),
+  summarizeFnResults,
+  lambda x:(pool.close(),pool.join(),x.duration)[2]
+)
+
+# test runners for specific nums of digits
+# gen7_20_rand = execTests(gen_nums(digits=7,samples=20))
+# gen7_5_fixed_prime = execTests(gen_nums(fixed_num=5515927,samples=5))
+
+# run a test comparing functions side by side on the same numbers
+# test_7digit_fixed_prime = execTests(gen_nums(fixed_num=5515927,samples=5))
+# test_7digit_fixed_prime(factorize,factorize1)
+
+
 
 # This is the brute force algorithm.
 # You are being asked to improve upon this
@@ -765,15 +851,19 @@ if __name__ == '__main__':
         globals_copy= globals().copy()
         fun = globals_copy.get(fun_to_call_string)
     # Open the file with list of numbers
+    # test_7digit_fixed_prime = execTests(gen_nums(fixed_num=5515927,samples=5))
+    # test_7digit_fixed_prime(factorize,factorize1)
+    
     f = open('composite_list.txt', 'r')
     # test each number
     for line in f:
         n = int(line)
         print('Factoring', n, '(', len(line), 'digits ): ', end='')
-        t1 = time_clock() # Record time
-        p = fun(n)
-        t2 = time_clock() # Record time
-        time_elapsed = t2 - t1  # seconds
+        time_elapsed = execTests([n])(fun)
+#         t1 = time_clock() # Record time
+#         p = fun(n)
+#         t2 = time_clock() # Record time
+#         time_elapsed = t2 - t1  # seconds
         print('Factor = ', p, ' other factor = ', n/p, ' Time Elapsed: ', time_elapsed)
         if n % p != 0:
             print('Factorization failed for: ', n)
