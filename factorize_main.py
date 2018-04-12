@@ -1,43 +1,23 @@
 # Your names:
-#
-#
+# Adam Laughlin
+# Robert Erhard
 #
 #
 
-# Did you copy and paste code from any online source?
+# Did you copy and paste code from any online source? No
 
 # Note: you are not allowed to do so for this assignment.
 # Your answer should generally be "no". But if you did,
 # mark the code clearly and explain here why you needed to do so.
 
-# Did you collaborate with someone outside your team?
+# Did you collaborate with someone outside your team? No
 # If yes, explain what you obtained from the collaboration.
 
 # Did you post queries on online forums (such as stackoverflow, ..)
-# related to this assignment?
+# related to this assignment? No
 # If yes, post the links here.
 
 #----------- IMPORTS ---------------------
-
-# If you have import statements, please explain in comments
-# why you need them. You can be very brief.
-
-from __future__ import print_function
-# I import this just for compatibility with python2 please use python3
-# though.
-
-import sys
-import math
-# sys has useful utilities I need.
-
-
-
-
-from time import clock as time_clock
-# Time is being imported to measure
-# running time for the factorize
-# function.
-
 from functools import reduce # for pipe
 from random import randrange # to generate complexity analysis nums
 from time import perf_counter,sleep # timing, and sleep for test fns
@@ -45,15 +25,19 @@ from multiprocessing import Pool # to run fns in different processes
 from os import getpid # to check that the fns are running in different processes
 from types import SimpleNamespace # dict property access is annoying
 import matplotlib.pyplot as plt
-
+import math
+from math import sqrt
 # -------------------------------------------
 
-# fn composition ltr
+# fn composition util
 pipe = lambda fn1,*fns: lambda arg,*args: reduce(lambda a,f: f(a), fns, fn1(arg,*args))
 
+
+# predicates
 zeroish = 0.000000000000001
 isNotSquare = lambda n:not isFloatZeroIsh(sqrt(n)%1)
 isFloatZeroIsh = lambda n:n < zeroish and n > 0
+
 
 
 
@@ -81,32 +65,12 @@ def factorize1(n):
     assert False, 'You gave me a prime number to factor'
     return -1
 
-
-
-def factorize2(n):
-    p = int(math.sqrt(n))
-    list_primes = list(range(2, p + 1))
-    i = 2
-    for i in list_primes:
-        if n % i == 0:
-            return i
-        j = 2 * i
-        while j < p:
-            if j in list_primes:
-                list_primes.remove(j)
-            j = j + i
-    assert False, 'You gave me a prime number to factor'
-    return -1
-
-
-
-
 def factorize3(n):
     for i in range(2, math.sqrt(n) + 1):
         if n % i == 0:
             return i
         x = x + 1
-    # assert False, 'You gave me a prime number to factor'
+    assert False, 'You gave me a prime number to factor'
     return -1
 
 # too many primes to create a sieve: how does the running time compare to the brute force
@@ -122,6 +86,21 @@ def factorize3(n):
     # counter i 2, starts at 0, goes to 1, everytime it goes to 0, skip the number
     # counter i3, starts at 0, goes to 2, everytime it gets to 0, skip the number
     # counter i4
+# import math
+def factorize2(n):
+    p = int(math.sqrt(n))
+    list_primes = list(range(2, p + 1))
+    i = 2
+    for i in list_primes:
+        if n % i == 0:
+            return i
+        j = 2 * i
+        while j < p:
+            if j in list_primes:
+                list_primes.remove(j)
+            j = j + i
+    assert False, 'You gave me a prime number to factor'
+    return -1
 
 
 # skips some basics, then jumps by 6, only up to n/7
@@ -147,6 +126,7 @@ def fermfactLoopMaxChecked(n):
     return a - math.sqrt(bsq)
 
 
+# import math
 def fermfact(n):
     a = int(math.ceil(math.sqrt(n)))
     bsq = a ** 2 - n
@@ -154,7 +134,6 @@ def fermfact(n):
         a = a + 1
         bsq = a ** 2 - n
     return a - math.sqrt(bsq)
-
 
 def fermfact1(n):
     a = int(math.ceil(math.sqrt(n)))
@@ -804,6 +783,8 @@ def fermfact5(n):
 
 
 
+
+
 def gen_nums(digits=1,samples=None,fixed_num=None):
   if(digits < 1):
     digits = 1
@@ -873,7 +854,6 @@ def withSyncProcessPool(fn):
 pairNumsWithFunctions = lambda nums: lambda *fns:[(fn,num) for num in nums for fn in fns]
 execNumFunctionPairs = withSyncProcessPool(lambda pool,tups:pool.map(execTest,tups))
 
-
 def plotSummaries(summaryList):
   legend = []
   fns = dict()
@@ -912,14 +892,11 @@ getFnTester = lambda nums:pipe(
 )
 
 
-
-
-
 if __name__ == '__main__':
   digitTesters = [getFnTester(gen_nums(digits=i)) for i in range(1,6)]
   # digitTesters = [getFnTester(gen_nums(fixed_num=5515927,samples=1)) for i in range(1,2)]
   plotSummaries([test(
-    # factorize,
+    factorize,
     factorize4,
     fermfactLoopMaxChecked
   ) for test in digitTesters]);
