@@ -1,55 +1,42 @@
 # Your names:
-#
-#
+# Adam Laughlin
+# Robert Erhard
 #
 #
 
-# Did you copy and paste code from any online source?
+# Did you copy and paste code from any online source? No
 
 # Note: you are not allowed to do so for this assignment.
 # Your answer should generally be "no". But if you did,
 # mark the code clearly and explain here why you needed to do so.
 
-# Did you collaborate with someone outside your team?
+# Did you collaborate with someone outside your team? No
 # If yes, explain what you obtained from the collaboration.
 
 # Did you post queries on online forums (such as stackoverflow, ..)
-# related to this assignment?
+# related to this assignment? No
 # If yes, post the links here.
 
 #----------- IMPORTS ---------------------
-
-# If you have import statements, please explain in comments
-# why you need them. You can be very brief.
-
-from __future__ import print_function
-# I import this just for compatibility with python2 please use python3
-# though.
-
-import sys
-import math
-# sys has useful utilities I need.
-
-
-
-
-from time import clock as time_clock
-# Time is being imported to measure
-# running time for the factorize
-# function.
-
 from functools import reduce # for pipe
 from random import randrange # to generate complexity analysis nums
 from time import perf_counter,sleep # timing, and sleep for test fns
 from multiprocessing import Pool # to run fns in different processes
 from os import getpid # to check that the fns are running in different processes
 from types import SimpleNamespace # dict property access is annoying
-
+import matplotlib.pyplot as plt
+import math
+from math import sqrt
 # -------------------------------------------
 
-# fn composition ltr
+# fn composition util
 pipe = lambda fn1,*fns: lambda arg,*args: reduce(lambda a,f: f(a), fns, fn1(arg,*args))
 
+
+# predicates
+zeroish = 0.000000000000001
+isNotSquare = lambda n:not isFloatZeroIsh(sqrt(n)%1)
+isFloatZeroIsh = lambda n:n < zeroish and n > 0
 
 
 
@@ -114,6 +101,30 @@ def factorize2(n):
             j = j + i
     assert False, 'You gave me a prime number to factor'
     return -1
+
+
+# skips some basics, then jumps by 6, only up to n/7
+# I can't think of any factor that would be greater than n/7 if n%2,3,5 fail - Adam
+# Could speed it up a bit by adding more tests and decreasing the loop max
+def factorize4 (n):
+  if(isFloatZeroIsh(n%2)):return 2;
+  if(isFloatZeroIsh(n%3)):return 3;
+  if(isFloatZeroIsh(n%5)):return 5;
+  loopMax = int(math.ceil(n/7))
+  for i in range(7,loopMax,6):
+    if(isFloatZeroIsh(n%i)): return i;
+    if(isFloatZeroIsh(n%(i+4))): return i+4;
+  return -1;
+
+def fermfactLoopMaxChecked(n):
+    a = int(math.ceil(math.sqrt(n)))
+    bsq = a ** 2 - n
+    while isNotSquare(n):
+        a = a + 1
+        bsq = a ** 2 - n
+        if(a>n): return -1
+    return a - math.sqrt(bsq)
+
 
 # import math
 def fermfact(n):
@@ -772,6 +783,8 @@ def fermfact5(n):
 
 
 
+
+
 def gen_nums(digits=1,samples=None,fixed_num=None):
   if(digits < 1):
     digits = 1
@@ -821,7 +834,7 @@ def execTest(tup):
   start = perf_counter()
   output = fn(num)
   end = perf_counter()
-  print('process {}: end   test {}({})=>{} with duration:{}ms'.format(pid,fn.__name__,num,output,end-start))
+  print('process {}: end   test {}({})=>{} with duration:{}seconds'.format(pid,fn.__name__,num,output,end-start))
   return SimpleNamespace(
     testedNum=num,
     duration=end-start,
@@ -840,7 +853,36 @@ def withSyncProcessPool(fn):
 
 pairNumsWithFunctions = lambda nums: lambda *fns:[(fn,num) for num in nums for fn in fns]
 execNumFunctionPairs = withSyncProcessPool(lambda pool,tups:pool.map(execTest,tups))
+
 def plotSummaries(summaryList):
+  legend = []
+  fns = dict()
+  ymax = 0
+  xmax = 0
+  for summary in summaryList:
+    for (key,s) in summary.items():
+      if(key not in fns):
+        fns[key]=SimpleNamespace(xvals=[],yvals=[],name=s.name)
+        legend.append(key)
+      fns[key].xvals.append(s.digits)
+      fns[key].yvals.append(s.max)
+      if(ymax<s.max):
+        ymax=s.max
+      if(xmax<s.digits):
+        xmax=s.digits
+  # ymax = ymax/5
+  plt.axis([1,xmax,0,ymax])
+  plt.ylabel('worst case run time in seconds')
+  plt.xlabel('10^n digits');
+  i=0
+  colors=['#CC0000','#CC3333','#CC7777','#CCAAAA']
+  legend.sort(key=lambda k:fns[k].yvals[len(fns[k].yvals)-1])
+  legend.reverse()
+  for key in legend:
+    plt.text(1.1, ymax-((ymax/10)*(i+1)), key,color=colors[i])
+    plt.plot(fns[key].xvals,fns[key].yvals,'o-',color=colors[i])
+    i=i+1
+  plt.show()
   return summaryList;
 
 getFnTester = lambda nums:pipe(
@@ -850,39 +892,11 @@ getFnTester = lambda nums:pipe(
 )
 
 
-
-# Below we have test code:
-# to test your function say factorize2, you would simply call
 if __name__ == '__main__':
-  digitTesters = [getFnTester(gen_nums(digits=i,samples=1)) for i in range(1,7)]
-  summaries = plotSummaries([tester(factorize) for tester in digitTesters])
-  [print(s) for s in summaries]
-  # fermfact(716550)
-#     # First parse command line arguments and figure out which
-#     # function we want to test
-#     if len(sys.argv) <= 1:
-#         fun = fermfact5
-#     else:
-#         fun_to_call_string = sys.argv[1]
-#         assert fun_to_call_string in globals(), ('You did not implement '+fun_to_call_string)
-#         globals_copy= globals().copy()
-#         fun = globals_copy.get(fun_to_call_string)
-#     # Open the file with list of numbers
-#     # test_7digit_fixed_prime = execTests(gen_nums(fixed_num=5515927,samples=5))
-#     # test_7digit_fixed_prime(factorize,factorize1)
-#
-#     f = open('composite_list.txt', 'r')
-#     # test each number
-#     for line in f:
-#         n = int(line)
-#         print('Factoring', n, '(', len(line), 'digits ): ', end='')
-#         time_elapsed = execTests([n])(fun)
-# #         t1 = time_clock() # Record time
-# #         p = fun(n)
-# #         t2 = time_clock() # Record time
-# #         time_elapsed = t2 - t1  # seconds
-#         print('Factor = ', p, ' other factor = ', n/p, ' Time Elapsed: ', time_elapsed)
-#         if n % p != 0:
-#             print('Factorization failed for: ', n)
-#             sys.exit(1)
-#     f.close()
+  digitTesters = [getFnTester(gen_nums(digits=i)) for i in range(1,6)]
+  # digitTesters = [getFnTester(gen_nums(fixed_num=5515927,samples=1)) for i in range(1,2)]
+  plotSummaries([test(
+    factorize,
+    factorize4,
+    fermfactLoopMaxChecked
+  ) for test in digitTesters]);
