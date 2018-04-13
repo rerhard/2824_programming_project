@@ -26,7 +26,7 @@ from os import getpid # to check that the fns are running in different processes
 from types import SimpleNamespace # dict property access is annoying
 import matplotlib.pyplot as plt
 import math
-from math import sqrt,isclose
+from math import sqrt,isclose # for fermat
 # -------------------------------------------
 
 # fn composition util
@@ -51,42 +51,43 @@ def factorize(n):
     # assert False, 'You gave me a prime number to factor'
     return -1
 
-
 # Improve on factorize function above:
 # Call your functions factorize1, factorize2, ...
 # Please write a brief comment before each function to describe
 # the improvements you are trying out.
 
-# Iterate only until n//2 and test only prime numbers.
+# factorize1: Iterates only until sqrt(n) and tests only odd numbers.
 def factorize1(n):
-    for i in range(2, math.sqrt(n) + 1):
+    if n % 2 == 0:
+        return 2
+    for i in range(3, int(math.sqrt(n)) + 1, 2):
         if n % i == 0:
             return i
     assert False, 'You gave me a prime number to factor'
     return -1
+# Sieve: sets up a sieve of eranthoses to generate primes up to sqrt(n).
+def sieve(n):
+    p = int(math.sqrt(n) + 1)  # sets upper limit for list of primes
+    list_primes = list(range(2, p)) # creates a list of numbers between 2 and p
+    i = 2
+    f = open('prime_list.txt', 'w')
+    while i < p:
+        if i in list_primes: # i starts at the bottom of list
+            j = 2 * i # set j = smallest multiple of prime i
+            while j < p:
+                if j in list_primes:
+                    list_primes.remove(j) # if j still in list, remove it
+                j = j + i # increment j by multiples of i.
+        i = i + 1 # move to the next value in the list.
+    for x in list_primes: # write each prime from the list to .txt file.
+        to_write = str(x) + '\n'
+        f.write(to_write)
+    f.close()
+    return list_primes
 
-def factorize3(n):
-    for i in range(2, math.sqrt(n) + 1):
-        if n % i == 0:
-            return i
-        x = x + 1
-    assert False, 'You gave me a prime number to factor'
-    return -1
-
-# too many primes to create a sieve: how does the running time compare to the brute force
-# generate lots of plots etc.
-# complexity analysis = is this too many?
-    # each digit you add, the space for search multiplies by 5
-
-
-#def factorize2(n): this function creates a list and edits it after each prime
-# factor has been considered and ruled out.
-# turns out to not be a time efficient way to do factorization.
-# create a counter i from 2 to sqrt(n)
-    # counter i 2, starts at 0, goes to 1, everytime it goes to 0, skip the number
-    # counter i3, starts at 0, goes to 2, everytime it gets to 0, skip the number
-    # counter i4
-# import math
+# factorize 2: unsuccessful attempt to use a sieve combined with brute force algorithm
+# to generate and utilize a list of primes in factorization process.
+# unsuccessful due to collosally slow speed.
 def factorize2(n):
     p = int(math.sqrt(n))
     list_primes = list(range(2, p + 1))
@@ -116,274 +117,63 @@ def factorize4 (n):
     if(isFloatZeroIsh(n%(i+4))): return i+4;
   return -1;
 
-# import math
+def fermfactLoopMaxChecked(n):
+    a = int(math.ceil(math.sqrt(n)))
+    bsq = a ** 2 - n
+    while isNotSquare(n):
+        a = a + 1
+        bsq = a ** 2 - n
+        if(a>n): return -1
+    return a - math.sqrt(bsq)
+
+
+# fermfact: basic fermat factorization. Assumes n = a^2 - b^2 = (a+b)(a-b) where (a-b) is
+# smallest factor. Begin testing from a = sqrt(n). bsq = a^2 - n.
+# Tests bsq repeatedly to se if it is a perfect square.
+# returns a - b
 def fermfact(n):
     a = int(math.ceil(math.sqrt(n)))
     bsq = a ** 2 - n
-    while math.sqrt(bsq) != int(math.sqrt(bsq)):
+    blimit = a
+    while math.sqrt(bsq) != int(math.sqrt(bsq)) and math.sqrt(bsq) < blimit:
+        a = a + 1
+        bsq = a ** 2 - n
+    if math.sqrt(bsq) == int(math.sqrt(bsq)):
+        return a - math.sqrt(bsq)
+    else:
+        return -1
+
+# fermfactx: tests whether removing one square root calculation improves efficiency
+def fermfact2(n):
+    a = int(math.ceil(math.sqrt(n)))
+    bsq = a ** 2 - n
+    while sqrt(bsq) % 1 != 0.0:
         a = a + 1
         bsq = a ** 2 - n
     return a - math.sqrt(bsq)
 
-def fermfact1(n):
+# fermfact1: basic improvement upon fermfact. Tests whether a will be even or odd
+# so that a can iterate by 2.
+def fermfact3(n):
     a = int(math.ceil(math.sqrt(n)))
-    if n % 4 == 1:
+    blimit = a
+    if n % 4 == 1: # if n mod 4 = 1, a must be odd.
         if a % 2 == 0:
-            a = a + 1
+            a = a - 1
     if n % 4 == 3:
         if a % 2 != 0:
-            a = a + 1
+            a = a - 1
     bsq = a ** 2 - n
-    while math.sqrt(bsq) != int(math.sqrt(bsq)):
+    while math.sqrt(bsq) != int(math.sqrt(bsq)) and math.sqrt(bsq) < blimit:
         a = a + 2
         bsq = a ** 2 - n
-    return a - math.sqrt(bsq)
-# ...
+    if math.sqrt(bsq) == int(math.sqrt(bsq)):
+        return a - math.sqrt(bsq)
+    else:
+        return -1
 
-#def factorize3(n):
-# ...
-# import math
-from math import sqrt
-def fermfact2(n):
-    p = n % 10
-    a = int(math.ceil(math.sqrt(n)))
-    bmodeven = [0, 4, 6]
-    bmododd = [1, 5, 9]
-    bsq = a ** 2 - n
-    zero = 0.0
-    if n % 4 == 1:
-        if a % 2 == 0:
-            a = a + 1
-            bsq = a ** 2 - n
-        if sqrt(bsq)%1 == zero:
-            return a - sqrt(bsq)
-        while bsq % 10 not in bmodeven:
-            a = a + 2
-            bsq = a ** 2 - n
-            if sqrt(bsq)%1 == 0:
-                return a - sqrt(bsq)
-        while sqrt(bsq) % 1 is not zero:
-            if n % 10 == 1:
-                if a % 10 == 1:
-                    a = a + 4
-                    bsq = a ** 2 - n
-                    if sqrt(bsq)%1 == zero:
-                        return a - sqrt(bsq)
-                    a = a + 4
-                    bsq = a ** 2 - n
-                    if sqrt(bsq)%1 == zero:
-                        return a - sqrt(bsq)
-                    a = a + 2
-                    bsq = a ** 2 - n
-                if a % 10 == 5:
-                    a = a + 4
-                    bsq = a ** 2 - n
-                    if sqrt(bsq)%1 == zero:
-                        return a - sqrt(bsq)
-                    a = a + 2
-                    bsq = a ** 2 - n
-                    if sqrt(bsq)%1 == zero:
-                        return a - sqrt(bsq)
-                    a = a + 4
-                    bsq = a ** 2 - n
-                if a % 10 == 9:
-                    a = a + 2
-                    bsq = a ** 2 - n
-                    if sqrt(bsq)%1 == zero:
-                        return a - sqrt(bsq)
-                    a = a + 4
-                    bsq = a ** 2 - n
-                    if sqrt(bsq)%1 == zero:
-                        return a - sqrt(bsq)
-                    a = a + 4
-                    bsq = a ** 2 - n
-            if n % 10 == 3:
-                if a % 10 == 3:
-                    a = a + 4
-                    bsq = a ** 2 - n
-                    if sqrt(bsq)%1 == zero:
-                        return a - sqrt(bsq)
-                    a + a + 6
-                    bsq = a ** 2 - n
-                if a % 10 == 7:
-                    a = a + 6
-                    bsq = a ** 2 - n
-                    if sqrt(bsq)%1 == zero:
-                        return a - sqrt(bsq)
-                    a = a + 4
-                    bsq = a ** 2 - n
-            if n % 10 == 5:
-                a = a + 2
-                bsq = a ** 2 - n
-            if n % 10 == 7:
-                if a % 10 == 1:
-                    a = a + 8
-                    bsq = a ** 2 - n
-                    if sqrt(bsq)%1 == zero:
-                        return a - sqrt(bsq)
-                    a = a + 2
-                    bsq = a ** 2 - n
-                if a % 10 == 9:
-                    a = a + 2
-                    bsq = a ** 2 - n
-                    if sqrt(bsq)%1 == zero:
-                        return a - sqrt(bsq)
-                    a = a + 8
-                    bsq = a ** 2 - n
-            if n % 10 == 9:
-                if a % 10 == 3:
-                    a = a + 2
-                    bsq = a ** 2 - n
-                    if sqrt(bsq)%1 == zero:
-                        return a - sqrt(bsq)
-                    a = a + 2
-                    bsq = a ** 2 - n
-                    if sqrt(bsq)%1 == zero:
-                        return a - sqrt(bsq)
-                    a = a + 6
-                    bsq = a ** 2 - n
-                if a % 10 == 5:
-                    a = a + 2
-                    bsq = a ** 2 - n
-                    if sqrt(bsq)%1 == zero:
-                        return a - sqrt(bsq)
-                    a = a + 6
-                    bsq = a ** 2 - n
-                    if sqrt(bsq)%1 == zero:
-                        return a - sqrt(bsq)
-                    a = a + 2
-                    bsq = a ** 2 - n
-                if a % 10 == 7:
-                    a = a + 6
-                    bsq = a ** 2 - n
-                    if sqrt(bsq)%1 == zero:
-                        return a - sqrt(bsq)
-                    a = a + 2
-                    bsq = a ** 2 - n
-                    if sqrt(bsq)%1 == zero:
-                        return a - sqrt(bsq)
-                    a = a + 2
-                    bsq = a ** 2 - n
-        return a - sqrt(bsq)
-    if n % 4 == 3:
-        if a % 2 != 0:
-            a = a + 1
-            bsq = a ** 2 - n
-        if sqrt(bsq)%1 == zero:
-            return a - sqrt(bsq)
-        while bsq % 10 not in bmododd:
-            a = a + 2
-            bsq = a ** 2 - n
-            if sqrt(bsq)%1 == zero:
-                return a - sqrt(bsq)
-        while sqrt(bsq)%1 is not zero:
-            if n % 10 == 1:
-                if a % 10 == 6:
-                    a = a + 4
-                    bsq = a ** 2 - n
-                    if sqrt(bsq)%1 == zero:
-                        return a - sqrt(bsq)
-                    a = a + 4
-                    bsq = a ** 2 - n
-                    if sqrt(bsq)%1 == zero:
-                        return a - sqrt(bsq)
-                    a = a + 2
-                    bsq = a ** 2 - n
-                if a % 10 == 0:
-                    a = a + 4
-                    bsq = a ** 2 - n
-                    if sqrt(bsq)%1 == zero:
-                        return a - sqrt(bsq)
-                    a = a + 2
-                    bsq = a ** 2 - n
-                    if sqrt(bsq)%1 == zero:
-                        return a - sqrt(bsq)
-                    a = a + 4
-                    bsq = a ** 2 - n
-                if a % 10 == 4:
-                    a = a + 2
-                    bsq = a ** 2 - n
-                    if sqrt(bsq)%1 == zero:
-                        return a - sqrt(bsq)
-                    a = a + 4
-                    bsq = a ** 2 - n
-                    if sqrt(bsq)%1 == zero:
-                        return a - sqrt(bsq)
-                    a = a + 4
-                    bsq = a ** 2 - n
-            if n % 10 == 3:
-                if a % 10 == 2:
-                    a = a + 6
-                    bsq = a ** 2 - n
-                    if sqrt(bsq)%1 == zero:
-                        return a - sqrt(bsq)
-                    a + a + 4
-                    bsq = a ** 2 - n
-                if a % 10 == 8:
-                    a = a + 4
-                    bsq = a ** 2 - n
-                    if sqrt(bsq)%1 == zero:
-                        return a - sqrt(bsq)
-                    a = a + 6
-                    bsq = a ** 2 - n
-            if n % 10 == 5:
-                a = a + 2
-                bsq = a ** 2 - n
-            if n % 10 == 7:
-                if a % 10 == 4:
-                    a = a + 2
-                    bsq = a ** 2 - n
-                    if sqrt(bsq)%1 == zero:
-                        return a - sqrt(bsq)
-                    a = a + 8
-                    bsq = a ** 2 - n
-                if a % 10 == 6:
-                    a = a + 8
-                    bsq = a ** 2 - n
-                    if sqrt(bsq)%1 == zero:
-                        return a - sqrt(bsq)
-                    a = a + 2
-                    bsq = a ** 2 - n
-            if n % 10 == 9:
-                if a % 10 == 8:
-                    a = a + 2
-                    bsq = a ** 2 - n
-                    if sqrt(bsq)%1 == zero:
-                        return a - sqrt(bsq)
-                    a = a + 2
-                    bsq = a ** 2 - n
-                    if sqrt(bsq)%1 == zero:
-                        return a - sqrt(bsq)
-                    a = a + 6
-                    bsq = a ** 2 - n
-                if a % 10 == 0:
-                    a = a + 2
-                    bsq = a ** 2 - n
-                    if sqrt(bsq)%1 == zero:
-                        return a - sqrt(bsq)
-                    a = a + 6
-                    bsq = a ** 2 - n
-                    if sqrt(bsq)%1 == zero:
-                        return a - sqrt(bsq)
-                    a = a + 2
-                    bsq = a ** 2 - n
-                if a % 10 == 2:
-                    a = a + 6
-                    bsq = a ** 2 - n
-                    if sqrt(bsq)%1 == zero:
-                        return a - sqrt(bsq)
-                    a = a + 2
-                    bsq = a ** 2 - n
-                    if sqrt(bsq)%1 == zero:
-                        return a - sqrt(bsq)
-                    a = a + 2
-                    bsq = a ** 2 - n
-        return a - sqrt(bsq)
-
-#def factorize4(n):
-# ...
-import random
-import fractions
+# unsuccessful attempt to implement pollard rho.
+# we removed the imports of necessary modules after failed attempts.
 def pollard_rho(n):
     x = (random.randint(1, n) % (n - 2)) + 2
     y = 0
@@ -399,27 +189,34 @@ def pollard_rho(n):
         if d == n:
             pollard_rho(n)
 
-# ...
+# fermfact4: uses mod 10 operator to set up iterations of 'a' that are greater than 2.
+# a begins at sqrt(n)
+# a is determined as either odd or even
+# b squared (bsq) is calculated n - a**2
+# if bsq mod 10 is not in list of allowed numbers for perfect squares
+# it is incremented by 2 until it does
+# while bsq is not a perfect square,
+# for each possible value of n mod 10, corrosponding a mod 10 values are incremented
+# by their appropriate steps until bsq is a perfect square.
 def fermfact4(n):
-    p = n % 10
     a = int(math.ceil(math.sqrt(n)))
-    bmodeven = [0, 4, 6]
-    bmododd = [1, 5, 9]
+    bmodeven = [0, 4, 6] # list of possible even perfect bsq values
+    bmododd = [1, 5, 9] # list of possible odd perfect bsq values
     bsq = a ** 2 - n
-    if n % 4 == 1:
+    if n % 4 == 1: # if n mod 4 is odd, a must be odd, b must be even
         if a % 2 == 0:
             a = a + 1
             bsq = a ** 2 - n
         if math.sqrt(bsq) == int(math.sqrt(bsq)):
                     return a - math.sqrt(bsq)
-        while bsq % 10 not in bmodeven:
+        while bsq % 10 not in bmodeven: # ensure bsq is in list of possible squares
             a = a + 2
             bsq = a ** 2 - n
             if math.sqrt(bsq) == int(math.sqrt(bsq)):
                 return a - math.sqrt(bsq)
-        while math.sqrt(bsq) != int(math.sqrt(bsq)):
-            if n % 10 == 1:
-                if a % 10 == 1:
+        while math.sqrt(bsq) != int(math.sqrt(bsq)): # until bsq is a perfect square
+            if n % 10 == 1: # if n mod 10 = 1 and a is odd, a mod 10 can be 1, 5, 9.
+                if a % 10 == 1: # this step and the following, increment a appropriately
                     a = a + 4
                     bsq = a ** 2 - n
                     if math.sqrt(bsq) == int(math.sqrt(bsq)):
@@ -520,13 +317,13 @@ def fermfact4(n):
                     a = a + 2
                     bsq = a ** 2 - n
         return a - math.sqrt(bsq)
-    if n % 4 == 3:
+    if n % 4 == 3: # same as above, this time if n mod 4 == 3, a must be even.
         if a % 2 != 0:
             a = a + 1
             bsq = a ** 2 - n
         if math.sqrt(bsq) == int(math.sqrt(bsq)):
                         return a - math.sqrt(bsq)
-        while bsq % 10 not in bmododd:
+        while bsq % 10 not in bmododd: # iterate until bsq is possible perfect square
             a = a + 2
             bsq = a ** 2 - n
             if math.sqrt(bsq) == int(math.sqrt(bsq)):
@@ -635,142 +432,110 @@ def fermfact4(n):
                     bsq = a ** 2 - n
         return  a - math.sqrt(bsq)
 
-
+#fermfact5: same function as fermfact4 but uses mod 16 as operator.
+# turns out it is more efficient and looks like prettier code to use mod 16.
+# later learned that it is convention for these sieve modulo values to be perfect squares
+# hence 16 is a much more appropriate choice.
 def fermfact5(n):
-  p = n % 10
-  a = int(math.ceil(math.sqrt(n)))
-  bmodeven = [0, 4]
-  bmododd = [1, 9]
-  bsq = a ** 2 - n
-  if n % 4 == 1:
-      if a % 2 == 0:
-          a = a + 1
-          bsq = a ** 2 - n
-      if math.sqrt(bsq) == int(math.sqrt(bsq)):
-          return a - math.sqrt(bsq)
-      while bsq % 16 not in bmodeven:
-          a = a + 2
-          bsq = a ** 2 - n
-          if math.sqrt(bsq) == int(math.sqrt(bsq)):
-              return a - math.sqrt(bsq)
-      while math.sqrt(bsq) != int(math.sqrt(bsq)):
-          if n % 16 == 1 or n % 16 == 13:
-              if a % 16 == 1 or a % 16 == 9:
-                  a = a + 6
-                  bsq = a ** 2 - n
-                  if math.sqrt(bsq) == int(math.sqrt(bsq)):
-                      return a - math.sqrt(bsq)
-                  a = a + 2
-                  bsq = a ** 2 - n
-                  if math.sqrt(bsq) == int(math.sqrt(bsq)):
-                      return a - math.sqrt(bsq)
-                  a = a + 6
-                  bsq = a ** 2 - n
-                  if math.sqrt(bsq) == int(math.sqrt(bsq)):
-                      return a - math.sqrt(bsq)
-                  a = a + 2
-                  bsq = a ** 2 - n
-              if a % 16 == 7 or a % 16 == 15:
-                  a = a + 2
-                  bsq = a ** 2 - n
-                  if math.sqrt(bsq) == int(math.sqrt(bsq)):
-                      return a - math.sqrt(bsq)
-                  a = a + 6
-                  bsq = a ** 2 - n
-                  if math.sqrt(bsq) == int(math.sqrt(bsq)):
-                      return a - math.sqrt(bsq)
-                  a = a + 2
-                  bsq = a ** 2 - n
-                  if math.sqrt(bsq) == int(math.sqrt(bsq)):
-                      return a - math.sqrt(bsq)
-                  a = a + 6
-                  bsq = a ** 2 - n
-          if n % 16 == 9 or n % 16 == 5:
-              if a % 16 == 3 or a % 16 == 11:
-                  a = a + 2
-                  bsq = a ** 2 - n
-                  if math.sqrt(bsq) == int(math.sqrt(bsq)):
-                      return a - math.sqrt(bsq)
-                  a = a + 6
-                  bsq = a ** 2 - n
-                  if math.sqrt(bsq) == int(math.sqrt(bsq)):
-                      return a - math.sqrt(bsq)
-                  a = a + 2
-                  bsq = a ** 2 - n
-                  if math.sqrt(bsq) == int(math.sqrt(bsq)):
-                      return a - math.sqrt(bsq)
-                  a = a + 6
-                  bsq = a ** 2 - n
-              if a % 16 == 5 or a % 16 == 13:
-                  a = a + 6
-                  bsq = a ** 2 - n
-                  if math.sqrt(bsq) == int(math.sqrt(bsq)):
-                      return a - math.sqrt(bsq)
-                  a = a + 2
-                  bsq = a ** 2 - n
-                  if math.sqrt(bsq) == int(math.sqrt(bsq)):
-                      return a - math.sqrt(bsq)
-                  a = a + 6
-                  bsq = a ** 2 - n
-                  if math.sqrt(bsq) == int(math.sqrt(bsq)):
-                      return a - math.sqrt(bsq)
-                  a = a + 2
-                  bsq = a ** 2 - n
-      return a - math.sqrt(bsq)
-  elif n % 4 == 3:
-      if a % 2 != 0:
-          a = a + 1
-          bsq = a ** 2 - n
-      if math.sqrt(bsq) == int(math.sqrt(bsq)):
-                      return a - math.sqrt(bsq)
-      while bsq % 16 not in bmododd:
-          a = a + 2
-          bsq = a ** 2 - n
-          if math.sqrt(bsq) == int(math.sqrt(bsq)):
-              return a - math.sqrt(bsq)
-      while math.sqrt(bsq) != int(math.sqrt(bsq)):
-          if n % 16 == 3 or n % 16 == 11:
-              if a % 16 == 1 or a % 16 == 9:
-                  a = a + 4
-                  bsq = a ** 2 - n
-          if n % 16 == 7 or n % 16 == 15:
-              if a % 16 ==  4:
-                  a = a + 4
-                  bsq = a ** 2 - n
-                  if math.sqrt(bsq) == int(math.sqrt(bsq)):
-                      return a - math.sqrt(bsq)
-                  a = a + 4
-                  bsq = a ** 2 - n
-                  if math.sqrt(bsq) == int(math.sqrt(bsq)):
-                      return a - math.sqrt(bsq)
-                  a = a + 8
-                  bsq = a ** 2 - n
-              if a % 16 == 8:
-                  a = a + 4
-                  bsq = a ** 2 - n
-                  if math.sqrt(bsq) == int(math.sqrt(bsq)):
-                      return a - math.sqrt(bsq)
-                  a = a + 8
-                  bsq = a ** 2 - n
-                  if math.sqrt(bsq) == int(math.sqrt(bsq)):
-                      return a - math.sqrt(bsq)
-                  a = a + 4
-                  bsq = a ** 2 - n
-              if a % 16 == 12:
-                  a = a + 8
-                  bsq = a ** 2 - n
-                  if math.sqrt(bsq) == int(math.sqrt(bsq)):
-                      return a - math.sqrt(bsq)
-                  a = a + 4
-                  bsq = a ** 2 - n
-                  if math.sqrt(bsq) == int(math.sqrt(bsq)):
-                      return a - math.sqrt(bsq)
-                  a = a + 4
-                  bsq = a ** 2 - n
-      return  a - math.sqrt(bsq)
-  else:
-      return -1
-
+    a = int(math.ceil(math.sqrt(n)))
+    bmodeven = [0, 4]
+    bmododd = [1, 9]
+    alimit = n//2
+    bsq = a ** 2 - n
+    if n % 4 == 1:
+        if a % 2 == 0:
+            a = a + 1
+            bsq = a ** 2 - n
+        if math.sqrt(bsq) == int(math.sqrt(bsq)):
+                    return a - math.sqrt(bsq)
+        while bsq % 16 not in bmodeven and a < alimit:
+            a = a + 2
+            bsq = a ** 2 - n
+            if math.sqrt(bsq) == int(math.sqrt(bsq)):
+                return a - math.sqrt(bsq)
+        while math.sqrt(bsq) != int(math.sqrt(bsq)) and a < alimit:
+            if n % 16 == 1 or n % 16 == 13:
+                if a % 16 == 1 or a % 16 == 9:
+                    a = a + 6
+                    bsq = a ** 2 - n
+                    if math.sqrt(bsq) == int(math.sqrt(bsq)):
+                        return a - math.sqrt(bsq)
+                    a = a + 2
+                    bsq = a ** 2 - n
+                    if math.sqrt(bsq) == int(math.sqrt(bsq)):
+                        return a - math.sqrt(bsq)
+                    a = a + 6
+                    bsq = a ** 2 - n
+                    if math.sqrt(bsq) == int(math.sqrt(bsq)):
+                        return a - math.sqrt(bsq)
+                    a = a + 2
+                    bsq = a ** 2 - n
+                if a % 16 == 7 or a % 16 == 15:
+                    a = a + 2
+                    bsq = a ** 2 - n
+                    if math.sqrt(bsq) == int(math.sqrt(bsq)):
+                        return a - math.sqrt(bsq)
+                    a = a + 6
+                    bsq = a ** 2 - n
+                    if math.sqrt(bsq) == int(math.sqrt(bsq)):
+                        return a - math.sqrt(bsq)
+                    a = a + 2
+                    bsq = a ** 2 - n
+                    if math.sqrt(bsq) == int(math.sqrt(bsq)):
+                        return a - math.sqrt(bsq)
+                    a = a + 6
+                    bsq = a ** 2 - n
+            if n % 16 == 9 or n % 16 == 5:
+                if a % 16 == 3 or a % 16 == 11:
+                    a = a + 2
+                    bsq = a ** 2 - n
+                    if math.sqrt(bsq) == int(math.sqrt(bsq)):
+                        return a - math.sqrt(bsq)
+                    a = a + 6
+                    bsq = a ** 2 - n
+                    if math.sqrt(bsq) == int(math.sqrt(bsq)):
+                        return a - math.sqrt(bsq)
+                    a = a + 2
+                    bsq = a ** 2 - n
+                    if math.sqrt(bsq) == int(math.sqrt(bsq)):
+                        return a - math.sqrt(bsq)
+                    a = a + 6
+                    bsq = a ** 2 - n
+                if a % 16 == 5 or a % 16 == 13:
+                    a = a + 6
+                    bsq = a ** 2 - n
+                    if math.sqrt(bsq) == int(math.sqrt(bsq)):
+                        return a - math.sqrt(bsq)
+                    a = a + 2
+                    bsq = a ** 2 - n
+                    if math.sqrt(bsq) == int(math.sqrt(bsq)):
+                        return a - math.sqrt(bsq)
+                    a = a + 6
+                    bsq = a ** 2 - n
+                    if math.sqrt(bsq) == int(math.sqrt(bsq)):
+                        return a - math.sqrt(bsq)
+                    a = a + 2
+                    bsq = a ** 2 - n
+    if math.sqrt(bsq) == int(math.sqrt(bsq)):
+        return a - math.sqrt(bsq)
+    if n % 4 == 3:
+        if a % 2 != 0:
+            a = a + 1
+            bsq = a ** 2 - n
+        if math.sqrt(bsq) == int(math.sqrt(bsq)):
+                        return a - math.sqrt(bsq)
+        while bsq % 16 not in bmododd and a < alimit:
+            a = a + 2
+            bsq = a ** 2 - n
+            if math.sqrt(bsq) == int(math.sqrt(bsq)):
+                return a - math.sqrt(bsq)
+        while math.sqrt(bsq) != int(math.sqrt(bsq)) and a < alimit:
+                    a = a + 4
+                    bsq = a ** 2 - n
+    if math.sqrt(bsq) == int(math.sqrt(bsq))and a - math.sqrt(bsq) != 1.0:
+        return  a - math.sqrt(bsq)
+    else:
+         return -1
 
 #
 # Test Number Generation
@@ -788,6 +553,7 @@ def gen_nums(digits=1,samples=None,fixed_num=None):
   sample_len = range(samples or int(10**(digits/2)))
   return [randrange(min_num,max_num) for s in sample_len]
 
+# for generating large primes to test for worst case scenarios
 # def genLargestPrimesOfEachDigitGroup(dmax=20,numPrimes=10,prime_check=is_probable_prime):
 #   currentMax=0;
 #   currentMin=0;
@@ -866,7 +632,8 @@ def summarizeFnTestResults(summary_list):
     del summaries[name].durations
   [print('{} \nmean: {} \nmax: {}'.format(s.name,s.mean,s.max)) for s in summaries.values()]
   return summaries;
-  # return summaries
+
+
 
 def execTest(tup):
   fn,num = tup;
@@ -883,15 +650,20 @@ def execTest(tup):
     output=output,
   )
 
+
+# runs fns in parallel
 def withSyncProcessPool(fn):
   def withPoolInner(lst):
-    maxProcs = max(len(lst),cpu_count())
+    maxProcs = min([len(lst),cpu_count()]) or 1
+    print(maxProcs,lst,cpu_count())
     pool = Pool(processes=maxProcs)
     result = fn(pool,lst)
     pool.close()
     pool.join()
     return result
   return withPoolInner
+
+
 
 pairNumsWithFunctions = lambda nums: lambda *fns:[(fn,num) for num in nums for fn in fns]
 execNumFunctionPairs = withSyncProcessPool(lambda pool,tups:pool.map(execTest,tups))
@@ -984,11 +756,12 @@ if __name__ == '__main__':
   #
   # # digitTesters = [getFnTester(gen_nums(digits=i,samples=100)) for i in range(1,8)]
   # # digitTesters = [getFnTester(gen_nums(fixed_num=669512017,samples=1)) for i in range(1,2)]
-  digitTesters = [getFnTester(l) for l in largestProbablePrimesByDigitLength]
-  shortTests = [getFnTester(l[0:1]) for l in largestProbablePrimesByDigitLength]
+  twentyPrimeTests = [getFnTester(l) for l in largestProbablePrimesByDigitLength[1:]]
+  singlePrimeTests = [getFnTester(l[:1]) for l in largestProbablePrimesByDigitLength[1:]]
+  singlePrimeTestsTo8 = [getFnTester(l[:1]) for l in largestProbablePrimesByDigitLength[1:9]]
   plotSummaries([test(
     # factorize,
     factorize4,
     # fermfact5,
     # fermfactLoopMaxChecked
-  ) for test in shortTests]);
+  ) for test in singlePrimeTestsTo8]);
