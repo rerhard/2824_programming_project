@@ -21,12 +21,12 @@
 from functools import reduce # for pipe
 from random import randrange # to generate complexity analysis nums
 from time import perf_counter,sleep # timing, and sleep for test fns
-from multiprocessing import Pool # to run fns in different processes
+from multiprocessing import Pool,cpu_count # to run fns in different processes
 from os import getpid # to check that the fns are running in different processes
 from types import SimpleNamespace # dict property access is annoying
 import matplotlib.pyplot as plt
 import math
-from math import sqrt
+from math import sqrt,isclose
 # -------------------------------------------
 
 # fn composition util
@@ -34,9 +34,9 @@ pipe = lambda fn1,*fns: lambda arg,*args: reduce(lambda a,f: f(a), fns, fn1(arg,
 
 
 # predicates
-zeroish = 0.000000000000001
+zero = 0.0
 isNotSquare = lambda n:not isFloatZeroIsh(sqrt(n)%1)
-isFloatZeroIsh = lambda n:n < zeroish and n > 0
+isFloatZeroIsh = lambda n:isclose(zero,n)
 
 
 
@@ -115,16 +115,6 @@ def factorize4 (n):
     if(isFloatZeroIsh(n%i)): return i;
     if(isFloatZeroIsh(n%(i+4))): return i+4;
   return -1;
-
-def fermfactLoopMaxChecked(n):
-    a = int(math.ceil(math.sqrt(n)))
-    bsq = a ** 2 - n
-    while isNotSquare(n):
-        a = a + 1
-        bsq = a ** 2 - n
-        if(a>n): return -1
-    return a - math.sqrt(bsq)
-
 
 # import math
 def fermfact(n):
@@ -782,11 +772,11 @@ def fermfact5(n):
       return -1
 
 
-
-
-
+#
+# Test Number Generation
+#
 def gen_nums(digits=1,samples=None,fixed_num=None):
-  if(digits < 1):
+  if(not (digits > 0)):
     digits = 1
 
   if(fixed_num):
@@ -797,6 +787,57 @@ def gen_nums(digits=1,samples=None,fixed_num=None):
   max_num = 10**digits
   sample_len = range(samples or int(10**(digits/2)))
   return [randrange(min_num,max_num) for s in sample_len]
+
+# def genLargestPrimesOfEachDigitGroup(dmax=20,numPrimes=10,prime_check=is_probable_prime):
+#   currentMax=0;
+#   currentMin=0;
+#   dmin=1
+#   digitGroups = [];
+#   d=dmax+1
+#   while(d > dmin):
+#     d=d-1
+#     currentMax = (10**(d+1))-1;
+#     currentMin = 10**d;
+#     dg = [];
+#     digitGroups.append(dg)
+#     i=currentMax;
+#     while(i>currentMin and len(dg)<numPrimes):
+#       i=i-1
+#       if(prime_check(i)):
+#         dg.append(i);
+#   digitGroups.reverse();
+#   return digitGroups;
+
+# Iteration 2, for getting worst case scenarios quickly - 20 of the largest primes in each digit group
+# generated using genLargestPrimesOfEachDigitGroup, with prime_check fn from rsa_keygen
+largestProbablePrimesByDigitLength = [
+  [],
+  [7, 5, 3, 2],
+  [97, 89, 83, 79, 73, 71, 67, 61, 59, 53],
+  [997, 991, 983, 977, 971, 967, 953, 947, 941, 937],
+  [9973, 9967, 9949, 9941, 9931, 9929, 9923, 9907, 9901, 9887],
+  [99991, 99989, 99971, 99961, 99929, 99923, 99907, 99901, 99881, 99877],
+  [999983, 999979, 999961, 999959, 999953, 999931, 999917, 999907, 999883, 999863],
+  [9999991, 9999973, 9999971, 9999943, 9999937, 9999931, 9999929, 9999907, 9999901, 9999889],
+  [99999989, 99999971, 99999959, 99999941, 99999931, 99999847, 99999839, 99999827, 99999821, 99999787],
+  [999999937, 999999929, 999999893, 999999883, 999999797, 999999761, 999999757, 999999751, 999999739, 999999733],
+  [9999999967, 9999999943, 9999999929, 9999999881, 9999999851, 9999999833, 9999999817, 9999999787, 9999999781, 9999999769],
+  [99999999977, 99999999947, 99999999943, 99999999907, 99999999871, 99999999851, 99999999833, 99999999829, 99999999821, 99999999769],
+  [999999999989, 999999999961, 999999999959, 999999999937, 999999999899, 999999999877, 999999999863, 999999999857, 999999999847, 999999999767],
+  [9999999999971, 9999999999863, 9999999999799, 9999999999763, 9999999999733, 9999999999701, 9999999999659, 9999999999643, 9999999999589, 9999999999553],
+  [99999999999973, 99999999999971, 99999999999959, 99999999999931, 99999999999929, 99999999999923, 99999999999853, 99999999999829, 99999999999821, 99999999999797],
+  [999999999999989, 999999999999947, 999999999999883, 999999999999877, 999999999999827, 999999999999809, 999999999999659, 999999999999643, 999999999999577, 999999999999571],
+  [9999999999999937, 9999999999999917, 9999999999999887, 9999999999999851, 9999999999999817, 9999999999999809, 9999999999999671, 9999999999999643, 9999999999999641, 9999999999999631],
+  [99999999999999997, 99999999999999977, 99999999999999961, 99999999999999943, 99999999999999919, 99999999999999823, 99999999999999761, 99999999999999739, 99999999999999727, 99999999999999587],
+  [999999999999999989, 999999999999999967, 999999999999999877, 999999999999999863, 999999999999999829, 999999999999999749, 999999999999999737, 999999999999999709, 999999999999999637, 999999999999999631],
+  [9999999999999999961, 9999999999999999943, 9999999999999999919, 9999999999999999877, 9999999999999999817, 9999999999999999751, 9999999999999999719, 9999999999999999701, 9999999999999999679, 9999999999999999673],
+  [99999999999999999989, 99999999999999999973, 99999999999999999941, 99999999999999999931, 99999999999999999857, 99999999999999999803, 99999999999999999799, 99999999999999999773, 99999999999999999701, 99999999999999999689],
+  [999999999999999999899, 999999999999999999887, 999999999999999999829, 999999999999999999787, 999999999999999999713, 999999999999999999683, 999999999999999999677, 999999999999999999661, 999999999999999999631, 999999999999999999571],
+]
+
+
+
+
 
 def summarizeFnTestResults(summary_list):
   summaries = {}
@@ -843,9 +884,10 @@ def execTest(tup):
   )
 
 def withSyncProcessPool(fn):
-  def withPoolInner(*args,**kwargs):
-    pool = Pool()
-    result = fn(pool,*args,**kwargs)
+  def withPoolInner(lst):
+    maxProcs = max(len(lst),cpu_count())
+    pool = Pool(processes=maxProcs)
+    result = fn(pool,lst)
     pool.close()
     pool.join()
     return result
@@ -853,6 +895,11 @@ def withSyncProcessPool(fn):
 
 pairNumsWithFunctions = lambda nums: lambda *fns:[(fn,num) for num in nums for fn in fns]
 execNumFunctionPairs = withSyncProcessPool(lambda pool,tups:pool.map(execTest,tups))
+last = lambda arr:arr[len(arr)-1]
+def computeO (last,next):
+  last[0].append(abs(math.log10(abs(next[2]-last[2]*10))));
+  return next;
+mean = lambda arr:max(arr)
 
 def plotSummaries(summaryList):
   legend = []
@@ -870,20 +917,61 @@ def plotSummaries(summaryList):
         ymax=s.max
       if(xmax<s.digits):
         xmax=s.digits
-  # ymax = ymax/5
-  plt.axis([1,xmax,0,ymax])
+  # ymax = ymax+ymax/20
+  plt.axis([1,xmax,0,ymax+ymax/20])
   plt.ylabel('worst case run time in seconds')
   plt.xlabel('10^n digits');
-  i=0
   colors=['#CC0000','#CC3333','#CC7777','#CCAAAA']
   legend.sort(key=lambda k:fns[k].yvals[len(fns[k].yvals)-1])
   legend.reverse()
+  i=0
+
   for key in legend:
-    plt.text(1.1, ymax-((ymax/10)*(i+1)), key,color=colors[i])
+    # [math.log10(x) for x in fns[key].yvals]
+    # [v for v in fns[key].yvals]
+
+    result = []
+    results = [result for v in fns[key].xvals]
+    reduceArgs = list(zip(results,fns[key].xvals,fns[key].yvals))
+    # proportion of numbers at one size, to numbers at the next size
+    # so time1/n1, compared to time2/n2
+    reduce(computeO,reduceArgs)
+    print('bigO',key,reduceArgs,fns[key].xvals)
+    print('bigO result',key,result)
+    # print('bigO',list(zip(fns[key].xvals,fns[key].yvals)))
+
+    plt.text(xmax-2, last(fns[key].yvals), '{} {:.5}'.format(key,last(fns[key].yvals)),color=colors[i])
     plt.plot(fns[key].xvals,fns[key].yvals,'o-',color=colors[i])
     i=i+1
   plt.show()
   return summaryList;
+
+# var estimateBigOhs = (nAndTimePairs)=>{
+#   var max=0;
+#   var Ohs = nAndTimePairs.map(([n,time])=>{
+#      if(typeof time !== 'number' || typeof n !== 'number'){
+#        return 'all args must be nums';
+#      }
+#      if(n<=1){
+#        return 'n must be greater than 1';
+#      }
+#      let result = time;
+#      let o = 0;
+#      while(true){
+#        result = result/n;
+#        o++;
+#        if (result<=1){break;}
+#      };
+#      if(o>max){max=o;}
+#      return o;
+#   });
+#   return {
+#      ohs:Ohs,
+#      ohsMax:`O(n^${max})`
+#   }
+# };
+# estimateBigOhs([[2,4],[4,16],[8,64]])
+
 
 getFnTester = lambda nums:pipe(
   pairNumsWithFunctions(nums),
@@ -893,10 +981,14 @@ getFnTester = lambda nums:pipe(
 
 
 if __name__ == '__main__':
-  digitTesters = [getFnTester(gen_nums(digits=i)) for i in range(1,6)]
-  # digitTesters = [getFnTester(gen_nums(fixed_num=5515927,samples=1)) for i in range(1,2)]
+  #
+  # # digitTesters = [getFnTester(gen_nums(digits=i,samples=100)) for i in range(1,8)]
+  # # digitTesters = [getFnTester(gen_nums(fixed_num=669512017,samples=1)) for i in range(1,2)]
+  digitTesters = [getFnTester(l) for l in largestProbablePrimesByDigitLength]
+  shortTests = [getFnTester(l[0:1]) for l in largestProbablePrimesByDigitLength]
   plotSummaries([test(
-    factorize,
+    # factorize,
     factorize4,
-    fermfactLoopMaxChecked
-  ) for test in digitTesters]);
+    # fermfact5,
+    # fermfactLoopMaxChecked
+  ) for test in shortTests]);
